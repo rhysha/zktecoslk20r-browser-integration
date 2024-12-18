@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fingerprint Viewer</title>
+</head>
+<body>
+    <h1>Fingerprint Viewer</h1>
+    <p>Waiting for fingerprint image...</p>
+    <img id="fingerprint-image" style="max-width: 300px; max-height: 400px;" alt="Fingerprint Image">
+
+    <script>
+        const serverHost = "ws://127.0.0.1:5000";
+
+        // Connect to the WebSocket server
+        const socket = new WebSocket(serverHost);
+
+        // Handle incoming messages
+        socket.onmessage = (event) => {
+            console.log("Received data from server:", event.data);
+
+            const imageElement = document.getElementById("fingerprint-image");
+
+            // Ensure the received data is a Base64 image
+            if (!event.data.startsWith("data:image/")) {
+                console.error("Invalid Base64 string. Adding prefix.");
+                event.data = `data:image/png;base64,${event.data}`;
+            }
+
+            // Set the received Base64 image to the <img> element
+            imageElement.src = event.data;
+        };
+
+        // Handle connection open
+        socket.onopen = () => {
+            console.log("Connected to the server");
+        };
+
+        // Handle connection close
+        socket.onclose = () => {
+            console.log("Disconnected from the server");
+        };
+
+        // Handle errors
+        socket.onerror = (error) => {
+            console.error("WebSocket error:", error);
+        };
+    </script>
+</body>
+</html>
